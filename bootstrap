@@ -38,16 +38,16 @@ set -e
 
 if [[ $opencv_installed != 0 ]]; then
   echo "Installing OpenCV..."
-  if [ ! -e "opencv-2.4.9.zip" ]; then
+  if [[ ! -e "opencv-2.4.9.zip" ]]; then
     wget http://softlayer-sng.dl.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/opencv-2.4.9.zip
   fi
 
-  if [ ! -e "opencv-2.4.9" ]; then
+  if [[ ! -e "opencv-2.4.9" ]]; then
     unzip opencv-2.4.9.zip
   fi
   cd opencv-2.4.9
 
-  if [ ! -d "release" ]; then
+  if [[ ! -d "release" ]]; then
     mkdir release
   fi
 
@@ -68,7 +68,7 @@ else
   echo "OpenCV already installed."
 fi
 
-if [ ! -d "~/.dropbox-dist" ]; then
+if [[ ! -d "~/.dropbox-dist" ]]; then
   echo "Installing Dropbox"
   wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
   wget -O dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
