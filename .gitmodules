@@ -1,0 +1,3 @@
+[submodule "py-video-retargeting"]
+	path = py-video-retargeting
+	url = https://github.com/PNProductions/py-video-retargeting
