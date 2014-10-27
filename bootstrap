@@ -7,11 +7,12 @@ git submodule update
 
 sudo yum update
 
-# Install OpenCV
 sudo yum -y install cmake
 sudo yum -y install kernel-devel gcc gcc-c++ make automake numpy
 sudo yum -y install python-devel
 
+# Dipendences for scipy
+yum -y install atlas-devel lapack lapack-devel blas-devel
 
 # Installing python 2.7
 if [[ -n $(python -V 2>&1 | grep 2.6) ]]; then
@@ -87,7 +88,15 @@ echo "Check ~/.dropbox-dist/dropbox.log for more details."
 echo "Setting up py-video-retargeting"
 cd py-video-retargeting
 
+# Enable swapping
+sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+sudo /sbin/mkswap /var/swap.1
+sudo /sbin/swapon /var/swap.1
+
 sudo pip install -r requirements
+
+sudo swapoff /var/swap.1
+sudo rm /var/swap.1
 
 cd ..
 
