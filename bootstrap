@@ -12,7 +12,7 @@ sudo yum -y install kernel-devel gcc gcc-c++ make automake numpy
 sudo yum -y install python-devel
 
 # Dipendences for scipy
-yum -y install atlas-devel lapack lapack-devel blas-devel
+sudo yum -y install atlas-devel lapack lapack-devel blas-devel
 
 # Installing python 2.7
 if [[ -n $(python -V 2>&1 | grep 2.6) ]]; then
