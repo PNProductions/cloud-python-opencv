@@ -8,7 +8,6 @@ sudo yum update
 
 # Install OpenCV
 sudo yum -y install cmake
-sudo yum - install cmake
 sudo yum -y install gcc gcc-c++ make numpy
 sudo yum -y install python-devel
 
