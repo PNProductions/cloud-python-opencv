@@ -40,13 +40,8 @@ else:
 
 deleteNumberH = 0
 
-suffix = None
-if len(sys.argv) >= 3 and sys.argv[2] == 'original':
-  suffix = '_original'
-  sys.path.insert(0, 'py-seam-merging/src')
-else:
-  suffix = '_modified'
-  sys.path.insert(0, 'modified-video-seam-merging/src')
+suffix = ''
+sys.path.insert(0, 'py-video-retargeting/src')
 
 
 from image_helper import image_open, local_path, to_matlab_ycbcr
