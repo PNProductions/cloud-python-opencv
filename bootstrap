@@ -12,7 +12,8 @@ sudo yum - install cmake
 sudo yum -y install gcc gcc-c++ make numpy
 sudo yum -y install python-devel
 
-wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/opencv-2.4.9.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fopencvlibrary%2Ffiles%2Fopencv-unix%2F2.4.9%2F&ts=1414393352&use_mirror=softlayer-sng jxvf OpenCV-2.4.9.tar.bz2
+wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/opencv-2.4.9.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fopencvlibrary%2Ffiles%2Fopencv-unix%2F2.4.9%2F&ts=1414393352&use_mirror=softlayer-sng
+tar jxvf OpenCV-2.4.9.tar.bz2
 cd OpenCV-2.4.9
 mkdir release
 cd release
