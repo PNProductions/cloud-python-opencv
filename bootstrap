@@ -28,9 +28,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 export PYTHONPATH=/usr/local/lib/python2.6/site-packages
 
-# Setup Python
-sudo easy_install pip
-
 # Download our repo
 git clone https://github.com/PNProductions/py-video-retargeting
 cd py-video-retargeting
