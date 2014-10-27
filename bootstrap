@@ -68,12 +68,14 @@ else
   echo "OpenCV already installed."
 fi
 
-if [[ ! -d "~/.dropbox-dist" ]]; then
+dropbox_folder=~/.dropbox-dist
+
+if [[ ! -d "${dropbox_folder}" ]]; then
   echo "Installing Dropbox"
   wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
   wget -O dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
-  mv .dropbox-dist ~/.dropbox-dist
-  mv dropbox.py ~/.dropbox-dist
+  mv .dropbox-dist $dropbox_folder
+  mv dropbox.py $dropbox_folder
 fi
 
 cd ..
