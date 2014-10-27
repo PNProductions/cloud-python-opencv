@@ -27,7 +27,7 @@ fi
 
 sudo pip install --upgrade numpy
 
-cd junk
+mkdir junk && cd junk
 
 set +e
 pkg-config --modversion opencv
