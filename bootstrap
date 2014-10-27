@@ -5,15 +5,29 @@ set -e
 git submodule init
 git submodule update
 
-cd ~
 sudo yum update
 
 # Install OpenCV
 sudo yum -y install cmake
-sudo yum -y install gcc gcc-c++ make numpy
+sudo yum -y install kernel-devel gcc gcc-c++ make automake numpy
 sudo yum -y install python-devel
 
+
+# Installing python 2.7
+if [[ -n $(python -V 2>&1 | grep 2.6) ]]; then
+  sudo yum -y install python27-devel
+  sudo rm /usr/bin/python
+  sudo ln -s /usr/bin/python2.7 /usr/bin/python
+  # Fixing yum
+  sub="#!/usr/bin/python2.6"
+  sudo sed "1s/.*/$sub/" $(which yum)
+  # Installing pip
+  sudo easy_install pip
+fi
+
 sudo pip install --upgrade numpy
+
+cd junk
 
 set +e
 pkg-config --modversion opencv
@@ -48,9 +62,34 @@ if [[ $opencv_installed != 0 ]]; then
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+else
+  echo "OpenCV already installed."
 fi
 
-cd $(dirname $0)
+if [ ! -d "~/.dropbox-dist" ]; then
+  echo "Installing Dropbox"
+  wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+  mv .dropbox-dist ~/.dropbox-dist
+  wget "https://www.dropbox.com/download?dl=packages/dropbox.py"
+  mv dropbox.py ~/.dropbox-dist
+fi
+
+cd ..
+
+rm -rf junk
+echo "Starting Dropbox..."
+~/.dropbox-dist >> ~/.dropbox-dist/dropbox.log 2>> ~/.dropbox-dist/dropbox.log &
+
+echo "Please configure dropbox if you haven't did it yet..."
+echo "Check ~/.dropbox-dist/dropbox.log for more details."
+
+
+echo "Setting up py-video-retargeting"
 cd py-video-retargeting
 
 sudo pip install -r requirements
+
+cd ..
+
+echo "Ready to go!"
+
