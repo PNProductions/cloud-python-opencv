@@ -4,7 +4,6 @@ set -e
 
 git submodule init
 git submodule update
-git submodule foreach git pull origin master
 
 sudo yum update
 
@@ -56,6 +55,8 @@ if [[ $opencv_installed != 0 ]]; then
   sudo make
   sudo make install
 
+  cd ../..
+
   echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/opencv.conf
 
   echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bash_profile
@@ -82,7 +83,7 @@ cd ..
 
 rm -rf junk
 echo "Starting Dropbox..."
-~/.dropbox-dist >> ~/.dropbox-dist/dropbox.log 2>> ~/.dropbox-dist/dropbox.log &
+~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log 2>> ~/.dropbox-dist/dropbox.log &
 
 echo "Please configure dropbox if you haven't did it yet..."
 echo "Check ~/.dropbox-dist/dropbox.log for more details."
@@ -101,7 +102,4 @@ sudo pip install -r requirements
 sudo swapoff /var/swap.1
 sudo rm /var/swap.1
 
-cd ..
-
 echo "Ready to go!"
-
