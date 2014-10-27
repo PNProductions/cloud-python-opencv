@@ -30,8 +30,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PY
 sudo make
 sudo make install
 
-sudo echo "/usr/local/lib" >> /etc/ld.so.conf.d/opencv.conf
-
+echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/opencv.conf
 
 echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bash_profile
 echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" >> ~/.bash_profile
