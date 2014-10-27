@@ -1,0 +1,37 @@
+#!/bin/bash
+
+cd ~
+
+# Install OpenCV
+sudo yum -y install cmake
+sudo yum - install cmake
+sudo yum -y install gcc gcc-c++ make numpy
+sudo yum -y install python-devel
+
+wget http://downloads.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/OpenCV-2.4.9.tar.bz2
+tar jxvf OpenCV-2.4.9.tar.bz2
+cd OpenCV-2.4.9
+mkdir release
+cd release
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
+make
+sudo make install
+
+echo "/usr/local/lib" >> /etc/ld.so.conf.d/opencv.conf
+
+
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bash_profile
+echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" >> ~/.bash_profile
+echo "export PYTHONPATH=/usr/local/lib/python2.6/site-packages" >> ~/.bash_profile
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+export PYTHONPATH=/usr/local/lib/python2.6/site-packages
+
+# Setup Python
+sudo easy_install pip
+
+# Download our repo
+git clone https://github.com/PNProductions/py-video-retargeting
+cd py-video-retargeting
+sudo pip install requirements
