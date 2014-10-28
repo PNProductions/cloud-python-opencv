@@ -22,8 +22,8 @@ if [[ -n $(python -V 2>&1 | grep 2.6) ]]; then
   # Fixing yum
   sudo sed -ri "1s/python/python2.6/" $(which yum)
   # Installing pip
-  sudo yum install python27-pip
-  sudo ln -s /usr/bin/pip2.7 /usr/bin/pip
+  sudo yum install -y python27-pip
+  sudo ln -s /usr/bin/pip-2.7 /usr/bin/pip
 fi
 
 sudo pip install --upgrade numpy
@@ -100,7 +100,7 @@ if [[ $opencv_installed != 0 ]]; then
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 
-  mv /usr/local/lib/python2.6 mv /usr/local/lib/python2.7
+  mv /usr/local/lib/python2.6 /usr/local/lib/python2.7
 else
   echo "OpenCV already installed."
 fi
