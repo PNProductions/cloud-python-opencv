@@ -28,7 +28,10 @@ fi
 
 sudo pip install --upgrade numpy
 
-mkdir junk && cd junk
+if [[ ! -d "release" ]]; then
+  mkdir junk
+fi
+cd junk
 
 set +e
 pkg-config --modversion opencv
@@ -98,6 +101,7 @@ sudo /sbin/mkswap /var/swap.1
 sudo /sbin/swapon /var/swap.1
 
 sudo pip install -r requirements
+sudo python setup.py install
 
 sudo swapoff /var/swap.1
 sudo rm /var/swap.1
