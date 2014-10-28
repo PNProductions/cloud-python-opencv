@@ -97,9 +97,9 @@ for filename in onlyfiles:
       structureImage[i] = TotalVariationDenoising(y[:, :, 0], iterTV).generate()
 
       kernel = np.array([[0, 0, 0],
-                            [1, 0, -1],
-                            [0, 0, 0]
-                            ])
+                         [1, 0, -1],
+                         [0, 0, 0]
+                         ])
 
       importance[i] = np.abs(cv2.filter2D(y[:, :, 0], -1, kernel, borderType=cv2.BORDER_REPLICATE)) + np.abs(cv2.filter2D(y[:, :, 0], -1, kernel.T, borderType=cv2.BORDER_REPLICATE))
 

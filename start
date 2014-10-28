@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Start dropbox if needed
+dropbox stop
+python video_example.py
+
+dropbox start
+rm -rf "~/Dropbox/Tesi cloud/results"
+cp results "~/Dropbox/Tesi cloud"

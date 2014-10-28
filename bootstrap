@@ -40,6 +40,32 @@ set -e
 
 if [[ $opencv_installed != 0 ]]; then
   echo "Installing OpenCV..."
+
+  echo "Installing Dipendences..."
+  sudo yum install -y libtool make nasm pkgconfig zlib-devel
+
+  #########################
+  # Installing libav*
+  #########################
+  wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+  sudo rpm -ivh rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+  sudo yum -y update
+
+  echo "[base]" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "name=CentOS-6 - Base" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "mirrorlist=http://mirrorlist.centos.org/?release=6&arch=x86_64&repo=os" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "enabled=0" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "gpgcheck=1" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "gpgkey=http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+
+  sudo yum install --enablerepo=base ffmpeg-devel
+
+  ##############################
+  # Installing other dipendences
+  ##############################
+  sudo yum install -y libpng-devel libjpeg-turbo-devel jasper-devel
+  sudo yum install tbb-devel
+
   if [[ ! -e "opencv-2.4.9.zip" ]]; then
     wget http://softlayer-sng.dl.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/opencv-2.4.9.zip
   fi
@@ -49,12 +75,18 @@ if [[ $opencv_installed != 0 ]]; then
   fi
   cd opencv-2.4.9
 
+  #######################
+  # Applying patch to opencv-2.4.9/modules/highgui/src/cap_ffmpeg_impl.hpp
+  #######################
+  sed '1445d' modules/highgui/src/cap_ffmpeg_impl.hpp:
+
+
   if [[ ! -d "release" ]]; then
     mkdir release
   fi
 
   cd release
-  cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
+  cmake -D CMAKE_BUILD_TYPE=RELEASE -D WITH_TBB=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
   sudo make
   sudo make install
 
@@ -79,18 +111,19 @@ if [[ ! -d "${dropbox_folder}" ]]; then
   wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
   wget -O dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
   mv .dropbox-dist $dropbox_folder
-  mv dropbox.py $dropbox_folder
+  sudo mv dropbox.py /usr/local/bin/dropbox
+  chmod +x /usr/local/bin/dropbox
+
+  echo "Please configure Dropbox..."
+  echo "Check ~/.dropbox-dist/dropbox.log for more details."
+  timeout 2s ~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log
+
+  echo "Setting Dropbox at startup..."
+  dropbox autostart y
 fi
 
 cd ..
-
 rm -rf junk
-echo "Starting Dropbox..."
-~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log 2>> ~/.dropbox-dist/dropbox.log &
-
-echo "Please configure dropbox if you haven't did it yet..."
-echo "Check ~/.dropbox-dist/dropbox.log for more details."
-
 
 echo "Setting up py-video-retargeting"
 cd py-video-retargeting
