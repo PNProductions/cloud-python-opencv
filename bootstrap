@@ -22,7 +22,8 @@ if [[ -n $(python -V 2>&1 | grep 2.6) ]]; then
   # Fixing yum
   sudo sed -ri "1s/python/python2.6/" $(which yum)
   # Installing pip
-  sudo easy_install pip
+  sudo yum install python27-pip
+  sudo ln -s /usr/bin/pip2.7 /usr/bin/pip
 fi
 
 sudo pip install --upgrade numpy
@@ -85,7 +86,7 @@ if [[ $opencv_installed != 0 ]]; then
 
   cd release
   cmake -D CMAKE_BUILD_TYPE=RELEASE -D WITH_TBB=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
-  sudo make
+  make
   sudo make install
 
   cd ../..
@@ -98,6 +99,8 @@ if [[ $opencv_installed != 0 ]]; then
 
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+
+  mv /usr/local/lib/python2.6 mv /usr/local/lib/python2.7
 else
   echo "OpenCV already installed."
 fi
@@ -134,6 +137,7 @@ sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
 sudo /sbin/mkswap /var/swap.1
 sudo /sbin/swapon /var/swap.1
 
+sudo pip install cython
 sudo pip install -r requirements
 sudo python setup.py install
 
