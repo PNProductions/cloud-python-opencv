@@ -85,7 +85,7 @@ for filename in onlyfiles:
 
   if isfile(splitext(basename(filename))[0] + '_garbage.mat'):
     r = loadmat(mat_name)
-    video, structureImage, importance = r['result'], r['structureImage'], r['importance']
+    video, structureImage, importance = r['video'], r['structureImage'], r['importance']
   else:
     i = 0
     while cap.isOpened() and i < frames_count:
@@ -106,7 +106,7 @@ for filename in onlyfiles:
       video[i] = X
       i += 1
 
-    savemat(mat_name, { 'importance' : importance, 'structureImage' : structureImage, 'result' : result }, do_compression=True)
+    savemat(mat_name, { 'importance' : importance, 'structureImage' : structureImage, 'video' : video }, do_compression=True)
 
   result, seams = seam_merging(video, structureImage, importance, deleteNumberW, alpha, betaEn)
 
