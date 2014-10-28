@@ -100,7 +100,7 @@ if [[ $opencv_installed != 0 ]]; then
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
   export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
 
-  mv /usr/local/lib/python2.6 /usr/local/lib/python2.7
+  sudo mv /usr/local/lib/python2.6 /usr/local/lib/python2.7
 else
   echo "OpenCV already installed."
 fi
