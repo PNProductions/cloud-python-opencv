@@ -114,7 +114,10 @@ if [[ ! -d "${dropbox_folder}" ]]; then
 
   echo "Please configure Dropbox..."
   echo "Check ~/.dropbox-dist/dropbox.log for more details."
+
+  set +e
   timeout 2s ~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log
+  set -e
 
   echo "Setting Dropbox at startup..."
   dropbox autostart y
