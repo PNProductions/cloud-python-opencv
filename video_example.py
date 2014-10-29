@@ -14,7 +14,6 @@ def generate_step(I, img):
   r = np.arange(img.shape[2])
   for i in xrange(img.shape[0]):
     result[i] = r > np.vstack(I[i])
-  print result
   return result.astype(np.uint64)
 
 def print_seams(result, seams):
@@ -22,7 +21,6 @@ def print_seams(result, seams):
   seams = seams.astype(np.uint64)
   A = np.ones_like(result) * 255
   correction = np.zeros((result.shape[0], result.shape[1], result.shape[2])).astype(np.uint64)
-  print seams.shape[0]
   for i in xrange(seams.shape[0]):
     X, Y = np.mgrid[:result.shape[0], :result.shape[1]]
     I = seams[i]

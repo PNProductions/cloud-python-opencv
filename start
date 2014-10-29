@@ -5,7 +5,8 @@ if [[ -n $(dropbox start | grep 'following') ]]; then
   exit 1
 fi
 
+rm -rf results/*
+
 python video_example.py
 
-rm -rf ~/Dropbox/Tesi\ cloud/results
-cp -r results/ ~/Dropbox/Tesi\ cloud/
+cp -r results/* ~/Dropbox/Tesi\ cloud/results
