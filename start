@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # Start dropbox if needed
-dropbox stop
+if [[ -n $(dropbox start | grep 'following') ]]; then
+  exit 1
+fi
+
 python video_example.py
 
-dropbox start
-rm -rf "~/Dropbox/Tesi cloud/results"
-cp results "~/Dropbox/Tesi cloud"
+rm -rf ~/Dropbox/Tesi\ cloud/results
+cp -r results/ ~/Dropbox/Tesi\ cloud/
