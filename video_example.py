@@ -30,13 +30,14 @@ def print_seams(result, seams):
     correction = correction + generate_step(I, result)
   return A
 
+deleteNumberW = 10
+counting_frames = None
 
-if len(sys.argv) >= 2 and sys.argv[1] is not None:
-  deleteNumberW = int(sys.argv[1])
-else:
-  deleteNumberW = 10
-
-deleteNumberH = 0
+for i in xrange(len(sys.argv) - 1):
+  if sys.argv[i] == '-s':
+    deleteNumberW = int(sys.argv[i + 1])
+  elif sys.argv[i] == '-f':
+    counting_frames = int(sys.argv[i + 1])
 
 suffix = ''
 sys.path.insert(0, 'py-video-retargeting/src')
@@ -67,21 +68,21 @@ for filename in onlyfiles:
   size = '_reduce' if deleteNumberW < 0 else '_enlarge'
   size += str(-deleteNumberW) if deleteNumberW < 0 else str(deleteNumberW)
 
-  name = splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + str(int(time.time()))
+  name = splitext(basename(filename))[0] + suffix + '_' + size + '_' + str(int(time.time()))
 
   frames_count, fps, width, height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT), cap.get(cv2.cv.CV_CAP_PROP_FPS), cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH), cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
 
   print frames_count, fps, width, height
 
-  frames_count = 10
+  frames_count = frames_count if counting_frames is None else counting_frames
 
   importance = np.empty((frames_count, height, width))
   structureImage = np.empty((frames_count, height, width))
   video = np.empty((frames_count, height, width, 3))
 
-  mat_name = splitext(basename(filename))[0] + '_garbage.mat'
+  mat_name = splitext(basename(filename))[0] + '_' + str(frames_count) + '_garbage.mat'
 
-  if isfile(splitext(basename(filename))[0] + '_garbage.mat'):
+  if isfile(mat_name):
     r = loadmat(mat_name)
     video, structureImage, importance = r['video'], r['structureImage'], r['importance']
   else:
