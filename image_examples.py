@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import os
 from os.path import basename, splitext
@@ -6,6 +8,10 @@ from numpy import size, concatenate
 import numpy
 import time
 import cv2
+from parallelize import parallelize
+from videoseam import seam_merging, progress_bar
+
+progress_bar(False)
 
 print sys.argv[0]
 
@@ -19,16 +25,14 @@ deleteNumberH = 0
 suffix = None
 if len(sys.argv) >= 3 and sys.argv[2] == 'original':
   suffix = '_original'
-  sys.path.insert(0, 'py-seam-merging/src')
+  sys.path.insert(0, 'py-seam-merging/examples')
 else:
   suffix = '_modified'
-  sys.path.insert(0, 'modified-video-seam-merging/src')
+  sys.path.insert(0, 'py-video-retargeting/examples')
 
-
-
-from image_helper import image_open, image_save, local_path, to_matlab_ycbcr
-from seam_merging import seam_merging
+from image_helper import image_open, image_save
 from tvd import TotalVariationDenoising
+
 
 path = './testing_images/reduction/*' if deleteNumberW < 0 else './testing_images/enlargement/*'
 onlyfiles = glob.glob(path)
@@ -42,8 +46,7 @@ makeNewDecData = False
 debug = False
 saveBMP = True
 
-for filename in onlyfiles:
-  print 'Opening file ' + basename(filename)
+def batch_images(filename):
   X = image_open(filename)
   y = cv2.cvtColor(X, cv2.COLOR_BGR2YCR_CB)
   y = y.astype(numpy.float64)
@@ -62,3 +65,12 @@ for filename in onlyfiles:
   
   name = splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + str(int(time.time()))
   image_save(img, name, './results/')
+  print filename + ' finished!'
+
+methods_batch = ([], [])
+for filename in onlyfiles:
+  methods_batch[0].append(batch_images)
+  methods_batch[1].append((filename,))
+
+
+parallelize(methods_batch[0], methods_batch[1])

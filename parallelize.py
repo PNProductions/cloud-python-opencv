@@ -3,21 +3,18 @@ from multiprocessing import Pool, cpu_count
 CPUS = cpu_count()
 
 def parallelize(methods, args):
-	results = []
-	if CPUS > 1:
-		for i in xrange(0, len(methods), CPUS):
-			pool = Pool()
-			for j in xrange(CPUS):
-				if i + j >= len(methods):
-					break
-				results.append(pool.apply_async(methods[i + j], args = args[i + j]))
-			pool.close()
-			pool.join()
-		map(lambda x: x.get(), results)
-	else:
-		for i in xrange(len(methods)):
-			results.append(methods[i](*args[i]))
-	return results
+  results = []
+  if CPUS > 1 and len(methods) > 1:
+    pool = Pool(CPUS)
+    for method, arg in zip(methods, args):
+      results.append(pool.apply_async(method, arg))
+    pool.close()
+    pool.join()
+    out = map(lambda x: x.get(), results)
+  else:
+    for method, arg in zip(methods, args):
+      results.append(method(*arg))
+  return results
 
 
 if __name__ == "__main__":

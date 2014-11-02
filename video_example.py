@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+
 import sys
 import os
 from os.path import basename, splitext, isfile
@@ -8,6 +9,10 @@ import numpy as np
 import time
 import cv2
 from scipy.io import savemat, loadmat
+from parallelize import parallelize
+from videoseam import seam_merging, progress_bar
+
+progress_bar(False)
 
 def generate_step(I, img):
   result = np.empty((img.shape[0], img.shape[1], img.shape[2]))
@@ -30,8 +35,8 @@ def print_seams(result, seams):
     correction = correction + generate_step(I, result)
   return A
 
-deleteNumberW = 10
-counting_frames = None
+deleteNumberW = 1
+counting_frames = 10
 
 for i in xrange(len(sys.argv) - 1):
   if sys.argv[i] == '-s':
@@ -40,15 +45,13 @@ for i in xrange(len(sys.argv) - 1):
     counting_frames = int(sys.argv[i + 1])
 
 suffix = ''
-sys.path.insert(0, 'py-video-retargeting/src')
+sys.path.insert(0, 'py-video-retargeting/examples')
 
 
 from image_helper import image_open, local_path, to_matlab_ycbcr
-from seam_merging import seam_merging
-from tvd import TotalVariationDenoising
 from video_helper import save_video_caps
+from tvd import TotalVariationDenoising
 
-# path = './testing_images/reduction/*' if deleteNumberW < 0 else './testing_images/enlargement/*'
 path = './testing_videos/*'
 
 onlyfiles = glob.glob(path)
@@ -62,8 +65,7 @@ makeNewDecData = False
 debug = False
 saveBMP = True
 
-for filename in onlyfiles:
-  print 'Opening file ' + basename(filename)
+def batch_videos(filename):
   cap = cv2.VideoCapture(filename)
   size = '_reduce' if deleteNumberW < 0 else '_enlarge'
   size += str(-deleteNumberW) if deleteNumberW < 0 else str(deleteNumberW)
@@ -71,8 +73,6 @@ for filename in onlyfiles:
   name = splitext(basename(filename))[0] + suffix + '_' + size + '_' + str(int(time.time()))
 
   frames_count, fps, width, height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT), cap.get(cv2.cv.CV_CAP_PROP_FPS), cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH), cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-
-  print frames_count, fps, width, height
 
   frames_count = frames_count if counting_frames is None else counting_frames
 
@@ -113,14 +113,15 @@ for filename in onlyfiles:
   A = np.clip(A, 0, 255).astype(np.uint8)
 
   result = np.clip(result, 0, 255).astype(np.uint8)
-  # Saving the result:
-  # fourcc = cv2.cv.CV_FOURCC(*'XVID')
-  # out = cv2.VideoWriter('./results/' + name + '.avi', fourcc, fps, (result.shape[2], result.shape[1]))
-  # for i in xrange(result.shape[0]):
-  #   out.write(result[i])
-
   save_video_caps(result, './results/' + name + '_')
   save_video_caps(A, './results/' + name + '_seams_')
+  cap.release()
+  print 'Finished file: ' + basename(filename)
 
-cap.release()
-#out.release()
+
+methods_batch = ([], [])
+for filename in onlyfiles:
+  methods_batch[0].append(batch_videos)
+  methods_batch[1].append((filename,))
+
+parallelize(methods_batch[0], methods_batch[1])

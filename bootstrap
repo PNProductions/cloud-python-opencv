@@ -2,8 +2,8 @@
 
 set -e
 
-git submodule init
-git submodule update
+# git submodule init
+# git submodule update
 
 sudo yum update
 
@@ -130,7 +130,6 @@ cd ..
 rm -rf junk
 
 echo "Setting up py-video-retargeting"
-cd py-video-retargeting
 
 # Enable swapping
 sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
@@ -138,8 +137,10 @@ sudo /sbin/mkswap /var/swap.1
 sudo /sbin/swapon /var/swap.1
 
 sudo pip install cython
-sudo pip install -r requirements
-sudo python setup.py install
+sudo pip install py-video-retargeting
+sudo pip install py-seam-merging
+# sudo pip install -r requirements
+# sudo python setup.py install
 
 sudo swapoff /var/swap.1
 sudo rm /var/swap.1
