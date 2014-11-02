@@ -1,0 +1,72 @@
+#!/bin/bash
+set +e
+pkg-config --modversion opencv
+opencv_installed=$?
+set -e
+
+if [[ $opencv_installed != 0 ]]; then
+  echo "Installing OpenCV..."
+
+  echo "Installing Dipendences..."
+  sudo yum install -y libtool make nasm pkgconfig zlib-devel
+
+  #########################
+  # Installing libav*
+  #########################
+  wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+  sudo rpm -ivh rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+
+  echo "[base]" | sudo tee /etc/yum.repos.d/CentOS-Base.repo
+  echo "name=CentOS-6 - Base" | sudo tee -a /etc/yum.repos.d/CentOS-Base.repo
+  echo "mirrorlist=http://mirrorlist.centos.org/?release=6&arch=x86_64&repo=os" | sudo tee -a /etc/yum.repos.d/CentOS-Base.repo
+  echo "enabled=0" | sudo tee -a /etc/yum.repos.d/CentOS-Base.repo
+  echo "gpgcheck=1" | sudo tee -a /etc/yum.repos.d/CentOS-Base.repo
+  echo "gpgkey=http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6" | sudo tee -a /etc/yum.repos.d/CentOS-Base.repo
+
+  sudo yum -y update
+  sudo yum -y install --enablerepo=base ffmpeg-devel
+
+  ##############################
+  # Installing other dipendences
+  ##############################
+  sudo yum install -y libpng-devel libjpeg-turbo-devel jasper-devel
+  sudo yum install -y tbb-devel
+
+  if [[ ! -e "opencv-2.4.9.zip" ]]; then
+    wget http://softlayer-sng.dl.sourceforge.net/project/opencvlibrary/opencv-unix/2.4.9/opencv-2.4.9.zip
+  fi
+
+  if [[ ! -e "opencv-2.4.9" ]]; then
+    unzip opencv-2.4.9.zip
+  fi
+  cd opencv-2.4.9
+
+  #######################
+  # Applying patch to opencv-2.4.9/modules/highgui/src/cap_ffmpeg_impl.hpp
+  #######################
+  sed -ri '1445d' modules/highgui/src/cap_ffmpeg_impl.hpp
+
+  if [[ ! -d "release" ]]; then
+    mkdir release
+  fi
+
+  cd release
+  cmake -D CMAKE_BUILD_TYPE=RELEASE -D WITH_TBB=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
+  make -j
+  sudo make install
+
+  cd ../..
+
+  echo "/usr/local/lib" | sudo tee /etc/ld.so.conf.d/opencv.conf
+
+  echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bash_profile
+  echo "export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" >> ~/.bash_profile
+  echo "export PYTHONPATH=/usr/local/lib/python2.7/site-packages" >> ~/.bash_profile
+
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+  export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+
+  sudo mv /usr/local/lib/python2.6 /usr/local/lib/python2.7
+else
+  echo "OpenCV already installed."
+fi

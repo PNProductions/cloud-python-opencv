@@ -1,0 +1,24 @@
+#!/bin/bash
+dropbox_folder=~/.dropbox-dist
+
+if [[ ! -d "${dropbox_folder}" ]]; then
+  echo "Installing Dropbox"
+  wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+  wget -O dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
+  mv .dropbox-dist $dropbox_folder
+  sudo mv dropbox.py /usr/local/bin/dropbox
+  chmod +x /usr/local/bin/dropbox
+
+  echo "Please configure Dropbox..."
+  echo "Check ~/.dropbox-dist/dropbox.log for more details."
+
+  set +e
+  timeout 2s ~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log
+  set -e
+
+  echo "Setting Dropbox at startup..."
+  dropbox autostart y
+fi
+
+cd ..
+rm -rf junk
