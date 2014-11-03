@@ -41,18 +41,18 @@ def print_seams(result, seams):
 
 deleteNumberW = 1
 counting_frames = 10
+path = './testing_videos/*'
 
 for i in xrange(len(sys.argv) - 1):
   if sys.argv[i] == '-s':
     deleteNumberW = int(sys.argv[i + 1])
   elif sys.argv[i] == '-f':
     counting_frames = int(sys.argv[i + 1])
-
-suffix = ''
-
-path = './testing_videos/*'
+  elif sys.argv[i] == '-p':
+    path = str(sys.argv[i + 1])
 
 onlyfiles = glob.glob(path)
+suffix = ''
 
 alpha = 0.5
 betaEn = 0.5

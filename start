@@ -1,11 +1,15 @@
 #!/bin/bash
 
-usage() { STR=$'Usage:\n-s <seam>\n-f <frame>'; echo "$STR"; 1>&2; exit 1; }
+usage() { STR=$'Usage:-p <video path>\n-s <seam>\n-f <frame>'; echo "$STR"; 1>&2; exit 1; }
 
 s=1
 f=10
-while getopts ":s:f:o2" arg; do
+p='./testing_videos/*'
+while getopts ":s:f:p:o2" arg; do
     case "${arg}" in
+        p)
+            p=${OPTARG}
+            ;;
         s)
             s=${OPTARG}
             ((s > 0)) || usage
@@ -29,13 +33,17 @@ shift $((OPTIND-1))
 #     usage
 # fi
 
+if [ ! -d "$p" ]; then
+  echo "Path for videos doesn't exists" && exit 1
+fi
+
 echo "Removing old results..."
 rm -rf results/*
 
-echo "Launching script with ${s} seam to cut and ${f} frame"
-python video_example.py -s ${s} -f ${f}
+echo "Launching script with ${s} seam to cut and ${f} frame and path ${p}"
+# python video_example.py -s ${s} -f ${f} -p {f}
 
 echo "Copying results to Dropbox folder"
-foldername=$(date +%Y-%m-%d__%H-%M-%S)
-mkdir ~/Dropbox/Tesi\ cloud/"$foldername"_result
-cp -r results/* ~/Dropbox/Tesi\ cloud/results
+# foldername=$(date +%Y-%m-%d__%H-%M-%S)
+# mkdir ~/Dropbox/Tesi\ cloud/"$foldername"_result
+# cp -r results/* ~/Dropbox/Tesi\ cloud/results

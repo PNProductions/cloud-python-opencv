@@ -18,6 +18,7 @@ echo "TVD version --> $PY_TVD"
 
 if [[ -n $(dropbox start | grep 'following') ]]; then
   echo "You have to link dropbox to the machine" && exit 1
+fi
 dropbox start
 if [ $? -ne 0 ]; then
     echo "Dropbox isn't configured properly"
