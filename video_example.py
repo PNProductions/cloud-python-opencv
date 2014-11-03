@@ -28,7 +28,7 @@ def generate_step(I, img):
 def print_seams(result, seams):
   print "printing seam"
   seams = seams.astype(np.uint64)
-  A = np.ones_like(result) * 255
+  A = np.zeros_like(result)  # np.ones_like(result) * 255
   correction = np.zeros((result.shape[0], result.shape[1], result.shape[2])).astype(np.uint64)
   for i in xrange(seams.shape[0]):
     X, Y = np.mgrid[:result.shape[0], :result.shape[1]]
@@ -108,7 +108,7 @@ def batch_videos(filename):
   result, seams = seam_merging(video, structureImage, importance, deleteNumberW, alpha, betaEn)
 
   A = print_seams(video, seams)
-  A = np.clip(A, 0, 255).astype(np.uint8)
+  A = np.clip(A * 0.8 + video, 0, 255).astype(np.uint8)
 
   result = np.clip(result, 0, 255).astype(np.uint8)
   save_video_caps(result, './results/' + name + '_')
