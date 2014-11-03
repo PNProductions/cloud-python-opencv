@@ -33,9 +33,9 @@ shift $((OPTIND-1))
 #     usage
 # fi
 
-if [ ! -d "$p" ]; then
-  echo "Path for videos doesn't exists" && exit 1
-fi
+# if [ ! -d "$p" ]; then
+#   echo "Path for videos doesn't exists" && exit 1
+# fi
 
 echo "Removing old results..."
 rm -rf results/*
