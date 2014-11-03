@@ -16,6 +16,9 @@ if [[ ! -d "${dropbox_folder}" ]]; then
   timeout 2s ~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log
   set -e
 
+  export LANGUAGE=en
+  dropbox stop
+  dropbox start
   echo "#Fix dropbox permission bug"  >> ~/.bash_profile
   echo "export LANGUAGE=en" >> ~/.bash_profile
   echo "dropbox stop" >> ~/.bash_profile

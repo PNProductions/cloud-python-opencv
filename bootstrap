@@ -8,6 +8,8 @@ echo "Downloading and initilizing Dropbox"
 bin/dropbox
 echo "Installing libraries"
 bin/requirements
+echo "Installing utils"
+bin/utils
 bin/swapping disable
 echo "Ready to go!"
 exit 0

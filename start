@@ -1,12 +1,41 @@
 #!/bin/bash
 
-# Start dropbox if needed
-if [[ -n $(dropbox start | grep 'following') ]]; then
-  echo "error starting dropbox" && exit 1
-fi
+usage() { STR=$'Usage:\n-s <seam>\n-f <frame>'; echo "$STR"; 1>&2; exit 1; }
 
+s=1
+f=10
+while getopts ":s:f:o2" arg; do
+    case "${arg}" in
+        s)
+            s=${OPTARG}
+            ((s > 0)) || usage
+            ;;
+        f)
+            f=${OPTARG}
+            ((f > 0)) || usage
+            ;;
+        o2) #fix a bug. has to be removed soon!
+            o2=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+#mandatory parameters
+# if [ -z "${s}" ] || [ -z "${f}" ] ; then
+#     usage
+# fi
+
+echo "Removing old results..."
 rm -rf results/*
 
-python video_example.py
+echo "Launching script with ${s} seam to cut and ${f} frame"
+python video_example.py -s ${s} -f ${f}
 
+echo "Copying results to Dropbox folder"
+foldername=$(date +%Y-%m-%d__%H-%M-%S)
+mkdir ~/Dropbox/Tesi\ cloud/"$foldername"_result
 cp -r results/* ~/Dropbox/Tesi\ cloud/results
