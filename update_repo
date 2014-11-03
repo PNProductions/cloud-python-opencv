@@ -1,0 +1,9 @@
+#!/bin/bash
+update() { git pull; python setup.py install;}
+
+echo "Updating py-seam-merging"
+cd ~/py-seam-merging
+update
+echo "Updating py-video-retargeting"
+cd ~/py-video-retargeting
+update
