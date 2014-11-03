@@ -8,12 +8,14 @@ from numpy import size, concatenate
 import numpy
 import time
 import cv2
-from parallelize import parallelize
+from tvd import TotalVariationDenoising
 from videoseam import seam_merging, progress_bar
 
-progress_bar(False)
+sys.path.insert(0, './utils')
+from parallelize import parallelize
+from image_helper import image_open, image_save
 
-print sys.argv[0]
+progress_bar(False)
 
 if len(sys.argv) >= 2 and sys.argv[1] is not None:
   deleteNumberW = int(sys.argv[1])
@@ -25,13 +27,10 @@ deleteNumberH = 0
 suffix = None
 if len(sys.argv) >= 3 and sys.argv[2] == 'original':
   suffix = '_original'
-  sys.path.insert(0, 'py-seam-merging/examples')
+  # sys.path.insert(0, 'py-seam-merging/examples')
 else:
   suffix = '_modified'
-  sys.path.insert(0, 'py-video-retargeting/examples')
-
-from image_helper import image_open, image_save
-from tvd import TotalVariationDenoising
+  # sys.path.insert(0, 'py-video-retargeting/examples')
 
 
 path = './testing_images/reduction/*' if deleteNumberW < 0 else './testing_images/enlargement/*'

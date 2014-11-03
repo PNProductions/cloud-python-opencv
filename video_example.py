@@ -78,7 +78,7 @@ def batch_videos(filename):
   structureImage = np.empty((frames_count, height, width))
   video = np.empty((frames_count, height, width, 3))
 
-  mat_name = splitext(basename(filename))[0] + '_' + str(frames_count) + '_garbage.mat'
+  mat_name = './temp/' + splitext(basename(filename))[0] + '_' + str(frames_count) + '_garbage.mat'
 
   if isfile(mat_name):
     r = loadmat(mat_name)
