@@ -57,3 +57,6 @@ target/
 
 # Matlab temporary matrix files
 *.mat
+
+#Results files
+results/*

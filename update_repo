@@ -1,5 +1,5 @@
 #!/bin/bash
-update() { git pull; python setup.py install;}
+update() { git pull; sudo pip install --upgrade .;}
 
 echo "Updating py-seam-merging"
 cd ~/py-seam-merging
@@ -7,3 +7,6 @@ update
 echo "Updating py-video-retargeting"
 cd ~/py-video-retargeting
 update
+echo "Updating cloud-python-opencv"
+cd ~/py-video-retargeting
+git pull
