@@ -41,7 +41,7 @@ def print_seams(result, seams):
 
 deleteNumberW = 1
 counting_frames = 10
-path = './testing_videos/*'
+path = './testing_videos/4_videos/*'
 
 for i in xrange(len(sys.argv) - 1):
   if sys.argv[i] == '-s':
