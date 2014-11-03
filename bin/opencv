@@ -52,7 +52,14 @@ if [[ $opencv_installed != 0 ]]; then
 
   cd release
   cmake -D CMAKE_BUILD_TYPE=RELEASE -D WITH_TBB=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON ..
-  make
+
+  #if only one CPU core is installed, using make -j makes the make script go out of memory, even with swapping is activated
+  if [[ $(nproc) -eq 1 ]]; then
+   make
+  else
+   make -j
+  fi
+
   sudo make install
 
   cd ../..

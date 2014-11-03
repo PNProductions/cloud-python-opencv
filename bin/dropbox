@@ -7,7 +7,7 @@ if [[ ! -d "${dropbox_folder}" ]]; then
   wget -O dropbox.py "https://www.dropbox.com/download?dl=packages/dropbox.py"
   mv .dropbox-dist $dropbox_folder
   sudo mv dropbox.py /usr/local/bin/dropbox
-  chmod +x /usr/local/bin/dropbox
+  sudo chmod +x /usr/local/bin/dropbox
 
   echo "Please configure Dropbox..."
   echo "Check ~/.dropbox-dist/dropbox.log for more details."
@@ -16,8 +16,11 @@ if [[ ! -d "${dropbox_folder}" ]]; then
   timeout 2s ~/.dropbox-dist/dropboxd >> ~/.dropbox-dist/dropbox.log
   set -e
 
-  echo "Setting Dropbox at startup..."
-  dropbox autostart y
+  echo "#Fix dropbox permission bug"  >> ~/.bash_profile
+  echo "export LANGUAGE=en" >> ~/.bash_profile
+  echo "dropbox stop" >> ~/.bash_profile
+  echo "dropbox start" >> ~/.bash_profile
+
 fi
 
 cd ..

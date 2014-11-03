@@ -2,7 +2,7 @@
 
 # Start dropbox if needed
 if [[ -n $(dropbox start | grep 'following') ]]; then
-  exit 1
+  echo "error starting dropbox" && exit 1
 fi
 
 rm -rf results/*
