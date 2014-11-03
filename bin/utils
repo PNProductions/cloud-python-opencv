@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Installing systsat"
+sudo yum install sysstat # Useful command: mpstat -P ALL
