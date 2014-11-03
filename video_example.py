@@ -48,8 +48,8 @@ for i in xrange(len(sys.argv) - 1):
     deleteNumberW = int(sys.argv[i + 1])
   elif sys.argv[i] == '-f':
     counting_frames = int(sys.argv[i + 1])
-  elif sys.argv[i] == '-p':
-    path = str(sys.argv[i + 1])
+  # elif sys.argv[i] == '-p':
+  #   path = str(sys.argv[i + 1])
 
 onlyfiles = glob.glob(path)
 suffix = ''

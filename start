@@ -40,9 +40,10 @@ shift $((OPTIND-1))
 echo "Removing old results..."
 rm -rf results/*
 
-echo "Launching script with ${s} seam to cut and ${f} frame and path ${p}"
-echo "python video_example.py -s ${s} -f ${f} -p ${p}"
-python video_example.py -s ${s} -f ${f} -p ${p}
+echo "Launching script with ${s} seam to cut and ${f} frame"
+echo "python video_example.py -s ${s} -f ${f}"
+# python video_example.py -s ${s} -f ${f} -p ${p}
+python video_example.py -s ${s} -f ${f}
 
 echo "Copying results to Dropbox folder"
 foldername=$(date +%Y-%m-%d__%H-%M-%S)
