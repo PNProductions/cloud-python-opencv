@@ -4,7 +4,7 @@ usage() { STR=$'Usage:-p <video path>\n-s <seam>\n-f <frame>'; echo "$STR"; 1>&2
 
 s=1
 f=10
-p='./testing_videos/*'
+p='./testing_videos/4_videos/*'
 while getopts ":s:f:p:o2" arg; do
     case "${arg}" in
         p)
@@ -41,6 +41,7 @@ echo "Removing old results..."
 rm -rf results/*
 
 echo "Launching script with ${s} seam to cut and ${f} frame and path ${p}"
+echo "python video_example.py -s ${s} -f ${f} -p ${p}"
 python video_example.py -s ${s} -f ${f} -p ${p}
 
 echo "Copying results to Dropbox folder"
