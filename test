@@ -1,22 +1,20 @@
 #!/bin/bash
 
-#Test if everyting works correctly
-#want the script to terminate as soon as any command fails
-set -e
-
 PYTON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
 NUMPY_VERSION=$(python -c 'import numpy; print(numpy.version.version)')
-OPENCV_VERION=$(python -c 'from cv2 import __version__; print(__version__)')
+OPENCV_VERION=$(python -c 'from cv2 import __version__; print(__version__)' 2> /dev/null)
 CYTHON_VERSION=$(pip show cython | grep Version)
 SCIPY_VERSION=$(pip show scipy | grep Version)
 PY_SEAM_MERGING_VERSION=$(pip show py-seam-merging | grep Version)
 PY_VIDEO_MERGING_VERSION=$(pip show py-video-retargeting | grep Version)
+PY_TVD=$(pip show py-tvd | grep Version)
 echo "Python version --> $PYTON_VERSION"
 echo "Numpy version --> $NUMPY_VERSION"
 echo "Opencv version --> $OPENCV_VERION"
 echo "Cython version --> $CYTHON_VERSION"
-echo "Seam version --> $CYTHON_VERSION"
-echo "Cython version --> $CYTHON_VERSION"
+echo "Image seam merging version --> $PY_SEAM_MERGING_VERSION"
+echo "Video seam merging version --> $PY_VIDEO_MERGING_VERSION"
+echo "TVD version --> $PY_TVD"
 
 dropbox start
 if [ $? -ne 0 ]; then

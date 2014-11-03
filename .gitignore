@@ -54,3 +54,6 @@ docs/_build/
 target/
 
 .DS_Store
+
+# Matlab temporary matrix files
+*.mat

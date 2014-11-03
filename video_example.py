@@ -4,13 +4,17 @@ import sys
 import os
 from os.path import basename, splitext, isfile
 import glob
-from numpy import size, concatenate
 import numpy as np
 import time
 import cv2
 from scipy.io import savemat, loadmat
-from parallelize import parallelize
 from videoseam import seam_merging, progress_bar
+from tvd import TotalVariationDenoising
+
+sys.path.insert(0, './utils')
+from image_helper import image_open, local_path, to_matlab_ycbcr
+from video_helper import save_video_caps
+from parallelize import parallelize
 
 progress_bar(False)
 
@@ -45,12 +49,6 @@ for i in xrange(len(sys.argv) - 1):
     counting_frames = int(sys.argv[i + 1])
 
 suffix = ''
-sys.path.insert(0, 'py-video-retargeting/examples')
-
-
-from image_helper import image_open, local_path, to_matlab_ycbcr
-from video_helper import save_video_caps
-from tvd import TotalVariationDenoising
 
 path = './testing_videos/*'
 
