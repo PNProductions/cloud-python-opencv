@@ -1,3 +1,29 @@
 #!/bin/bash
 
 #Test if everyting works correctly
+#want the script to terminate as soon as any command fails
+set -e
+
+PYTON_VERSION=$(python -c 'import sys; print(".".join(map(str, sys.version_info[:3])))')
+NUMPY_VERSION=$(python -c 'import numpy; print(numpy.version.version)')
+OPENCV_VERION=$(python -c 'from cv2 import __version__; print(__version__)')
+CYTHON_VERSION=$(pip show cython | grep Version)
+SCIPY_VERSION=$(pip show scipy | grep Version)
+PY_SEAM_MERGING_VERSION=$(pip show py-seam-merging | grep Version)
+PY_VIDEO_MERGING_VERSION=$(pip show py-video-retargeting | grep Version)
+echo "Python version --> $PYTON_VERSION"
+echo "Numpy version --> $NUMPY_VERSION"
+echo "Opencv version --> $OPENCV_VERION"
+echo "Cython version --> $CYTHON_VERSION"
+echo "Seam version --> $CYTHON_VERSION"
+echo "Cython version --> $CYTHON_VERSION"
+
+dropbox start
+if [ $? -ne 0 ]; then
+    echo "Dropbox isn't configured properly"
+else
+  echo "Dropbox is running correctly"
+fi
+
+
+

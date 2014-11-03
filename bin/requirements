@@ -2,9 +2,8 @@
 echo "Setting up py-video-retargeting and py-seam-merging"
 
 sudo pip install cython
+sudo pip install scipy
 sudo pip install py-video-retargeting
 sudo pip install py-seam-merging
 # sudo pip install -r requirements
 # sudo python setup.py install
-
-bin/swapping disable
