@@ -41,6 +41,7 @@ def print_seams(result, seams):
 
 deleteNumberW = 1
 counting_frames = 10
+save_importance = 0
 path = './testing_videos/4_videos/*'
 
 for i in xrange(len(sys.argv) - 1):
@@ -48,6 +49,8 @@ for i in xrange(len(sys.argv) - 1):
     deleteNumberW = int(sys.argv[i + 1])
   elif sys.argv[i] == '-f':
     counting_frames = int(sys.argv[i + 1])
+  elif sys.argv[i] == '-i':
+    save_importance = int(sys.argv[i + 1])
   # elif sys.argv[i] == '-p':
   #   path = str(sys.argv[i + 1])
 
@@ -113,6 +116,10 @@ def batch_videos(filename):
   result = np.clip(result, 0, 255).astype(np.uint8)
   save_video_caps(result, './results/' + name + '_')
   save_video_caps(A, './results/' + name + '_seams_')
+  if save_importance:
+    imp = np.clip(importance, 0, 255).astype(np.uint8)
+    imp = np.expand_dims(imp, axis=3)[:, :, :, [0, 0, 0]]
+    save_video_caps(imp, './results/' + name + '_importance_')
   cap.release()
   print 'Finished file: ' + basename(filename)
 
