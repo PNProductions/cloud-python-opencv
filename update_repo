@@ -7,6 +7,9 @@ update
 echo "Updating py-video-retargeting"
 cd ~/py-video-retargeting
 update
+echo "Updating py-seam-carving"
+cd ~/py-seam-carving
+update
 echo "Updating cloud-python-opencv"
 cd ~/py-video-retargeting
 git pull
