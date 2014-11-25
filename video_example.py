@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import sys
-import os
 from os.path import basename, splitext, isfile
 import glob
 import numpy as np
@@ -9,14 +8,15 @@ import time
 import cv2
 from scipy.io import savemat, loadmat
 from videoseam import seam_merging, progress_bar
+from seamcarving import seam_carving
 from tvd import TotalVariationDenoising
 
 sys.path.insert(0, './utils')
-from image_helper import image_open, local_path, to_matlab_ycbcr
 from video_helper import save_video_caps
 from parallelize import parallelize
 
 progress_bar(False)
+
 
 def generate_step(I, img):
   result = np.empty((img.shape[0], img.shape[1], img.shape[2]))
@@ -24,6 +24,7 @@ def generate_step(I, img):
   for i in xrange(img.shape[0]):
     result[i] = r > np.vstack(I[i])
   return result.astype(np.uint64)
+
 
 def print_seams(result, seams):
   print "printing seam"
@@ -42,17 +43,29 @@ def print_seams(result, seams):
 deleteNumberW = 1
 counting_frames = 10
 save_importance = 0
+allowed_methods = ["seam_merging", "seam_carving"]
+method = allowed_methods[0]
 path = './testing_videos/4_videos/*'
 
 for i in xrange(len(sys.argv) - 1):
   if sys.argv[i] == '-s':
+    if type(sys.argv[i + 1]) != int:
+      sys.exit("seam number must be a integer")
     deleteNumberW = int(sys.argv[i + 1])
   elif sys.argv[i] == '-f':
+    if type(sys.argv[i + 1]) != int:
+      sys.exit("frame to consider must be a integer")
     counting_frames = int(sys.argv[i + 1])
   elif sys.argv[i] == '-i':
+    if type(sys.argv[i + 1]) != int or int(sys.argv[i + 1]) != 0 or int(sys.argv[i + 1]) != 1:
+      sys.exit("parameter -i must be 0 or 1")
     save_importance = int(sys.argv[i + 1])
-  # elif sys.argv[i] == '-p':
-  #   path = str(sys.argv[i + 1])
+  elif sys.argv[i] == '-m':
+    if not sys.argv[i + 1] in allowed_methods:
+      sys.exit("allowed methods are: \n" + ", ".join(allowed_methods))
+    method = str(sys.argv[i + 1])
+  elif sys.argv[i] == '-p':
+    path = "./" + str(sys.argv[i + 1]) + "*"
 
 onlyfiles = glob.glob(path)
 suffix = ''
@@ -66,9 +79,10 @@ makeNewDecData = False
 debug = False
 saveBMP = True
 
+
 def batch_videos(filename):
   cap = cv2.VideoCapture(filename)
-  size = '_reduce' if deleteNumberW < 0 else '_enlarge'
+  size = '_reduce' if deleteNumberW > 0 else '_enlarge'
   size += str(-deleteNumberW) if deleteNumberW < 0 else str(deleteNumberW)
 
   name = splitext(basename(filename))[0] + suffix + '_' + size + '_' + str(int(time.time()))
@@ -106,9 +120,12 @@ def batch_videos(filename):
       video[i] = X
       i += 1
 
-    savemat(mat_name, { 'importance' : importance, 'structureImage' : structureImage, 'video' : video }, do_compression=True)
+    savemat(mat_name, {'importance': importance, 'structureImage': structureImage, 'video': video}, do_compression=True)
 
-  result, seams = seam_merging(video, structureImage, importance, deleteNumberW, alpha, betaEn)
+  if method == "seam_merging":
+    result, seams = seam_merging(video, structureImage, importance, deleteNumberW, alpha, betaEn)
+  elif method == "seam_carving":
+    result, seams = seam_carving(video, deleteNumberW)
 
   A = print_seams(video, seams)
   A = np.clip(A * 0.8 + video, 0, 255).astype(np.uint8)

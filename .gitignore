@@ -60,3 +60,9 @@ target/
 
 #Results files
 results/*
+
+#Flake8 setup
+setup.cfg
+
+#Sublime text stuff
+*.sublime-workspace

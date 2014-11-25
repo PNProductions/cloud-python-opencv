@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import os
 from os.path import basename, splitext
 import glob
-from numpy import size, concatenate
 import numpy
 import time
 import cv2
@@ -52,16 +50,15 @@ def batch_images(filename):
   structureImage = TotalVariationDenoising(y[:, :, 0], iterTV).generate()
 
   importance = y
-  kernel = numpy.array([[0,  0,  0],
-                        [1,  0, -1],
-                        [0,  0,  0]
+  kernel = numpy.array([[0, 0, 0],
+                        [1, 0, -1],
+                        [0, 0, 0]
                         ])
   importance = numpy.abs(cv2.filter2D(y[:, :, 0], -1, kernel, borderType=cv2.BORDER_REPLICATE)) + numpy.abs(cv2.filter2D(y[:, :, 0], -1, kernel.T, borderType=cv2.BORDER_REPLICATE))
 
   img = seam_merging(X, structureImage, importance, deleteNumberW, alpha, betaEn)
   size = '_reduce' if deleteNumberW < 0 else '_enlarge'
   size += str(-deleteNumberW) if deleteNumberW < 0 else str(deleteNumberW)
-  
   name = splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + str(int(time.time()))
   image_save(img, name, './results/')
   print filename + ' finished!'
