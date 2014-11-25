@@ -4,7 +4,6 @@ import sys
 from os.path import basename, splitext, isfile
 import glob
 import numpy as np
-import time
 import cv2
 from scipy.io import savemat, loadmat
 from videoseam import seam_merging, progress_bar
@@ -45,7 +44,7 @@ counting_frames = 10
 save_importance = 0
 allowed_methods = ["seam_merging", "seam_carving"]
 method = allowed_methods[0]
-path = './testing_videos/4_videos/*'
+path = './testing_videos/downsample/japan/*'
 
 for i in xrange(len(sys.argv) - 1):
   if sys.argv[i] == '-s':
@@ -85,7 +84,7 @@ def batch_videos(filename):
   size = '_reduce' if deleteNumberW > 0 else '_enlarge'
   size += str(-deleteNumberW) if deleteNumberW < 0 else str(deleteNumberW)
 
-  name = splitext(basename(filename))[0] + suffix + '_' + size + '_' + str(int(time.time()))
+  name = splitext(basename(filename))[0] + suffix + '_' + size + '_' + method
 
   frames_count, fps, width, height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT), cap.get(cv2.cv.CV_CAP_PROP_FPS), cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH), cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
 
