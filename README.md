@@ -15,7 +15,7 @@ The main script is `boostrap` that installs:
 [2]: https://github.com/PNProductions/py-seam-merging
 [3]: https://github.com/PNProductions/py-tvd
 
-## Example usage
+## Installation
  After lanching an Amazon EC2 instance:
 ```shell
 ssh using the certificate given _ssh -i CERTIFICATE.pem ec2-user@IP_ADDRESS_
@@ -40,3 +40,19 @@ Video seam merging version --> Version: 0.1
 TVD version --> Version: 1.0
 Dropbox is running correctly
 ```
+##Example usage
+To start the algorithm run
+```shell
+python video_retargeting.py
+```
+You can also use the following options:
+* `-s SEAM`: specify the seam to use (default is 1)
+* `-f FRAME`: specify the frame number to consider (default is 10)
+* `-p PATH`: specify the path of the input videos
+* `-i`: save the importance map
+* `-nv`: do not save motion vector
+* `-g`: use motion vector for the whole video and not frame by frame
+* `-m s{seam_merging,seam_carving,time_merging}`:
+  * `seam_merging`: use seam merging algorithm (default)
+  * `seam_carving`: use Rubinstein seam carving method with forward energy
+  * `time_merging`: apply a temporally resize instead that a width resize. A seam is a frame, so, if you want to delete 10 frame from the video use the option `-s 10`

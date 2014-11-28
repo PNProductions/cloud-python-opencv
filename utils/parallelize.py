@@ -10,6 +10,7 @@ def parallelize(methods, args):
       results.append(pool.apply_async(method, arg))
     pool.close()
     pool.join()
+    print results
     out = map(lambda x: x.get(), results)
   else:
     for method, arg in zip(methods, args):
@@ -18,12 +19,12 @@ def parallelize(methods, args):
 
 
 if __name__ == "__main__":
-	import numpy as np
+  import numpy as np
 
-	def multiply(x, y):
-		return x * y
+  def multiply(x, y):
+    return x * y
 
-	x = np.ones((3000, 3000))
-	y = np.ones((3000, 3000))
+  x = np.ones((3000, 3000))
+  y = np.ones((3000, 3000))
 
-	parallelize([multiply, multiply, multiply, multiply, multiply], [(x, y), (x, y), (x, y), (x, y), (x, y)])
+  parallelize([multiply, multiply, multiply, multiply, multiply], [(x, y), (x, y), (x, y), (x, y), (x, y)])

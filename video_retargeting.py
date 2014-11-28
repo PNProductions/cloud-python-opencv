@@ -47,11 +47,9 @@ parser.add_argument('-p', '--path', default='testing_videos/downsample/japan/', 
 parser.add_argument('-s', '--seam', default=1, type=int, help='Seam to use (default %(default)s)')
 parser.add_argument('-f', '--frame', type=int, help='Frame to use (default all video frame)')
 parser.add_argument('-i', '--save-importance', action='store_true', help='Save importance map')
-parser.add_argument('-v', '--save-vectors', action='store_true', dest='save_vectors', help='Save motion vector')
-parser.add_argument('-nv', '--no-save-vectors', action='store_false', dest='save_vectors', help='Save motion vector')
+parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_false', dest='save_vectors', help='Do not save motion vector')
 parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector')
 parser.add_argument('-m', '--method', default='seam_merging', choices=['seam_merging', 'seam_carving', 'time_merging'], help='Algorithm to use')
-parser.set_defaults(save_vectors=True)
 args = parser.parse_args()
 
 # -------------------------------------------------------
