@@ -10,7 +10,6 @@ def parallelize(methods, args):
       results.append(pool.apply_async(method, arg))
     pool.close()
     pool.join()
-    print results
     out = map(lambda x: x.get(), results)
   else:
     for method, arg in zip(methods, args):
