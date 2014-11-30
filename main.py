@@ -190,11 +190,11 @@ def batch_videos(filename):
   cap.release()
   print 'Finished file: ' + basename(filename)
 
-batch("./testing_videos/downsample/other/car_down_61.m4v")
+# batch("./testing_videos/downsample/other/car_down_61.m4v")
 
-# methods_batch = ([], [])
-# for filename in glob.glob("./" + args.path + "/*"):
-#   methods_batch[0].append(batch)
-#   methods_batch[1].append((filename,))
+methods_batch = ([], [])
+for filename in glob.glob("./" + args.path + "/*"):
+  methods_batch[0].append(batch)
+  methods_batch[1].append((filename,))
 
-# parallelize(methods_batch[0], methods_batch[1])
+parallelize(methods_batch[0], methods_batch[1])
