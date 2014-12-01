@@ -1,7 +1,8 @@
 cloud-python-opencv
 ===================
 
-A small set of startup scripts to install everything we need on amazon EC2.
+A small set of startup scripts to install everything we need to run image and video retargeting script on **amazon EC2**.
+
 The main script is `boostrap` that installs:
  * **python 2.7** (instead of 2.6)
  * **numpy 1.9**
@@ -41,18 +42,21 @@ TVD version --> Version: 1.0
 Dropbox is running correctly
 ```
 ##Example usage
-To start the algorithm run
+The main script is `main.py`, that can launch retargeting script both on images and on videos.
+
+To start the algorithm with the default parameters run:
 ```shell
-python video_retargeting.py
+python main.py
 ```
 You can also use the following options:
-* `-s SEAM`: specify the seam to use (default is 1)
+* `-s SEAM`: specify the seam to use (default is 1 for videos and image_width/2 for images)
 * `-f FRAME`: specify the frame number to consider (default is 10)
-* `-p PATH`: specify the path of the input videos
+* `-p PATH`: specify the path of the input videos ot photos (specify a folder not a single file), default is` testing_videos/downsample/japan/`
 * `-i`: save the importance map
 * `-nv`: do not save motion vector
 * `-g`: use motion vector for the whole video and not frame by frame
-* `-m s{seam_merging,seam_carving,time_merging}`:
-  * `seam_merging`: use seam merging algorithm (default)
+* `-m {seam_merging,seam_carving,time_merging}`:
+  * `seam_merging_gc`: use seam merging algorithm with graph cut (default)
+  * `seam_merging`: use seam merging algorithm with dynamic programming (not available for videos)
   * `seam_carving`: use Rubinstein seam carving method with forward energy
-  * `time_merging`: apply a temporally resize instead that a width resize. A seam is a frame, so, if you want to delete 10 frame from the video use the option `-s 10`
+  * `time_merging`: apply a temporally resize instead that a width resize. A seam is a frame, so, if you want to delete 10 frame from the video use the option `-s 10`. This method is available only for videos

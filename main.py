@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import sys
-import argparse
 from os.path import basename, splitext, isfile
-import glob
+import glob, os, datetime, argparse, sys
+import distutils.core
 import numpy as np
 import cv2
 from scipy.io import savemat, loadmat
@@ -41,6 +40,7 @@ parser.add_argument('-s', '--seam', type=int, help='Seam to use (default 1 for v
 parser.add_argument('-f', '--frame', type=int, help='Frame to use (default all video frame)')
 parser.add_argument('-i', '--save-importance', action='store_true', help='Save importance map')
 parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_false', dest='save_vectors', help='Do not save motion vector')
+parser.add_argument('-d', '--dropbox', default=False, action='store_true', dest='with_dropbox', help='Remove result foler and copy results in the dropbox folder (only cloud server)')
 parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector')
 parser.add_argument('-m', '--method', default='seam_merging_gc', choices=['seam_merging_gc', 'seam_merging', 'seam_carving', 'time_merging'], help='Algorithm to use, seam_merging_gc is the seam merging algorithm using graph cut instead of dynamic programming')
 args = parser.parse_args()
@@ -192,9 +192,22 @@ def batch_videos(filename):
 
 # batch("./testing_videos/downsample/other/car_down_61.m4v")
 
+if args.with_dropbox:
+  print "Removing old results"
+  files = glob.glob('results/*')
+  for f in files:
+      os.remove(f)
+
+print "----------START----------"
 methods_batch = ([], [])
 for filename in glob.glob("./" + args.path + "/*"):
   methods_batch[0].append(batch)
   methods_batch[1].append((filename,))
 
 parallelize(methods_batch[0], methods_batch[1])
+print "----------END----------"
+
+if args.with_dropbox:
+  datetime_dir = os.path.join("/home/ec2-user/Dropbox/Tesi cloud", datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+  os.makedirs(datetime_dir)
+  distutils.dir_util.copy_tree(os.path.join(os.getcwd(), "results"), datetime_dir)
