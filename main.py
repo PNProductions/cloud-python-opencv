@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# to kill this process use pkill -f main.py
+
 from os.path import basename, splitext, isfile
 import glob
 import os
