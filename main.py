@@ -20,7 +20,13 @@ from utils.parallelize import parallelize
 from utils.image_helper import image_open, image_save
 from tvd import TotalVariationDenoising
 
-vs.PROGRESS_BAR = True
+# Fix path name relationships when this script is running from a different folder
+if __name__ == '__main__':
+  if os.path.dirname(__file__) != '':
+    os.chdir(os.path.dirname(__file__))
+
+
+vs.PROGRESS_BAR = False
 suffix = ''
 
 # -------------------------------------------------------
@@ -207,19 +213,22 @@ def batch_videos(filename):
 if args.with_dropbox:
   print "Removing old results"
   os.system("rm -rf results/*")
-  # files = glob.glob('results/*')
-  # for f in files:
-  #     os.remove(f)
+
 
 # batch("./testing_videos/downsample/other/car_down_61.m4v")
 
 print "----------START----------"
 time1 = time.time()
-methods_batch = ([], [])
-for filename in glob.glob("./" + args.path + "/*"):
-  methods_batch[0].append(batch)
-  methods_batch[1].append((filename,))
-parallelize(methods_batch[0], methods_batch[1])
+
+if os.path.isfile(args.path):  # if path is a single file
+  batch(args.path)
+else:  # if path is folder
+  methods_batch = ([], [])
+  for filename in glob.glob("./" + args.path + "/*"):
+    methods_batch[0].append(batch)
+    methods_batch[1].append((filename,))
+  parallelize(methods_batch[0], methods_batch[1])
+
 time2 = time.time()
 print 'Elaboration tooks %f seconds' % (time2 - time1)
 print "----------END----------"
