@@ -55,8 +55,11 @@ You can also use the following options:
 * `-i`: save the importance map
 * `-nv`: do not save motion vector
 * `-g`: use motion vector for the whole video and not frame by frame
+* `-d`: Launch with Dropbox support, only for ec2-server. Copy the result in the dropbox folder and remove the old result
 * `-m {seam_merging,seam_carving,time_merging}`:
   * `seam_merging_gc`: use seam merging algorithm with graph cut (default)
   * `seam_merging`: use seam merging algorithm with dynamic programming (not available for videos)
   * `seam_carving`: use Rubinstein seam carving method with forward energy
   * `time_merging`: apply a temporally resize instead that a width resize. A seam is a frame, so, if you want to delete 10 frame from the video use the option `-s 10`. This method is available only for videos
+
+To avoid borken pipe error and to get the script to ignore the hangup signal and keep running use: `nohup python main.py`
