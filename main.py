@@ -7,6 +7,7 @@ import datetime
 import argparse
 import sys
 import distutils.core
+import time
 import numpy as np
 import cv2
 from scipy.io import savemat, loadmat
@@ -213,12 +214,14 @@ if args.with_dropbox:
 # batch("./testing_videos/downsample/other/car_down_61.m4v")
 
 print "----------START----------"
+time1 = time.time()
 methods_batch = ([], [])
 for filename in glob.glob("./" + args.path + "/*"):
   methods_batch[0].append(batch)
   methods_batch[1].append((filename,))
-
 parallelize(methods_batch[0], methods_batch[1])
+time2 = time.time()
+print 'Elaboration tooks %f seconds' % (time2 - time1)
 print "----------END----------"
 
 if args.with_dropbox:
