@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 from os.path import basename, splitext, isfile
-import glob, os, datetime, argparse, sys
+import glob
+import os
+import datetime
+import argparse
+import sys
 import distutils.core
 import numpy as np
 import cv2
@@ -45,6 +49,7 @@ parser.add_argument('-g', '--global-vector', action='store_true', help='Use glob
 parser.add_argument('-m', '--method', default='seam_merging_gc', choices=['seam_merging_gc', 'seam_merging', 'seam_carving', 'time_merging'], help='Algorithm to use, seam_merging_gc is the seam merging algorithm using graph cut instead of dynamic programming')
 args = parser.parse_args()
 
+
 # -------------------------------------------------------
 # -------------------------------------------------------
 def generate_step(I, img):
@@ -68,26 +73,31 @@ def print_seams(result, seams):
     correction = correction + generate_step(I, result)
   return A
 
+
 def get_cap(filename):
   if filename.endswith(('.m4v')):
     return cv2.VideoCapture(filename)
   return image_open(filename)
+
 
 def get_output_file_name(filename):
   size = '_reduce' if args.seam < 0 else '_enlarge'
   size += str(-args.seam) if args.seam < 0 else str(args.seam)
   return splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + args.method
 
+
 def cartoon_image(image):
   y = cv2.cvtColor(image, cv2.COLOR_BGR2YCR_CB).astype(np.float64)
   return y, TotalVariationDenoising(y[:, :, 0], iterTV).generate()
 
+
 def importance_map(image):
   kernel = np.array([[0, 0, 0],
-                        [1, 0, -1],
-                        [0, 0, 0]
-                        ])
+                     [1, 0, -1],
+                     [0, 0, 0]
+                     ])
   return np.abs(cv2.filter2D(image[:, :, 0], -1, kernel, borderType=cv2.BORDER_REPLICATE)) + np.abs(cv2.filter2D(image[:, :, 0], -1, kernel.T, borderType=cv2.BORDER_REPLICATE))
+
 
 def batch(filename):
   if filename.endswith(('.m4v')):
@@ -95,14 +105,15 @@ def batch(filename):
   else:
     batch_images(filename)
 
+
 def batch_images(filename):
   image = get_cap(filename)
-  args.seam = args.seam if args.seam != None else -image.shape[1]/2
+  args.seam = args.seam if args.seam is not None else -image.shape[1] / 2
   name = get_output_file_name(filename)
   y, cartoon = cartoon_image(image)
   importance = importance_map(y)
   if args.method == "seam_merging_gc":
-    img = vs.seam_merging(image, cartoon, importance, None, args.seam if args.seam != None else image.shape[0]/2, alpha, beta)
+    img = vs.seam_merging(image, cartoon, importance, None, args.seam if args.seam is not None else image.shape[0] / 2, alpha, beta)
   elif args.method == "seam_merging":
     img = sm.seam_merging(image, cartoon, importance, args.seam, alpha, beta)
   elif args.method == "seam_carving":
@@ -112,9 +123,10 @@ def batch_images(filename):
   image_save(img, name, './results/')
   print filename + ' finished!'
 
+
 def batch_videos(filename):
   cap = get_cap(filename)
-  args.seam = args.seam if args.seam != None else 1
+  args.seam = args.seam if args.seam is not None else 1
   name = get_output_file_name(filename)
 
   frame_count, fps, width, height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT), cap.get(cv2.cv.CV_CAP_PROP_FPS), cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH), cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
@@ -137,7 +149,7 @@ def batch_videos(filename):
       if not ret:
         break
       y, cartoon[i] = cartoon_image(image)
-    
+
       # Motion vector frame per frame (filtered with medianBlur to delete salt and pepper noise)
       if i > 0:
         vectors[i - 1] = farneback(cartoon[i - 1], cartoon[i])
@@ -148,7 +160,7 @@ def batch_videos(filename):
       video[i] = image
       i += 1
 
-    savemat(mat_name, {'importance': importance, 'cartoon': cartoon, 'video': video, 'vectors':vectors}, do_compression=True)
+    savemat(mat_name, {'importance': importance, 'cartoon': cartoon, 'video': video, 'vectors': vectors}, do_compression=True)
 
   # Motion vector normalizing and saving
   maxv = vectors.max(axis=0)
@@ -190,13 +202,15 @@ def batch_videos(filename):
   cap.release()
   print 'Finished file: ' + basename(filename)
 
-# batch("./testing_videos/downsample/other/car_down_61.m4v")
 
 if args.with_dropbox:
   print "Removing old results"
-  files = glob.glob('results/*')
-  for f in files:
-      os.remove(f)
+  os.system("rm -rf results/*")
+  # files = glob.glob('results/*')
+  # for f in files:
+  #     os.remove(f)
+
+# batch("./testing_videos/downsample/other/car_down_61.m4v")
 
 print "----------START----------"
 methods_batch = ([], [])
