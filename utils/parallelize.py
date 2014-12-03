@@ -2,6 +2,7 @@ from multiprocessing import Pool, cpu_count
 
 CPUS = cpu_count()
 
+
 def parallelize(methods, args):
   results = []
   if CPUS > 1 and len(methods) > 1:
@@ -10,7 +11,7 @@ def parallelize(methods, args):
       results.append(pool.apply_async(method, arg))
     pool.close()
     pool.join()
-    out = map(lambda x: x.get(), results)
+    results = map(lambda x: x.get(), results)
   else:
     for method, arg in zip(methods, args):
       results.append(method(*arg))
