@@ -54,8 +54,8 @@ parser.add_argument('-f', '--frame', type=int, help='Frame to use (default all v
 parser.add_argument('-i', '--save-importance', action='store_true', help='Save importance map')
 parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_false', dest='save_vectors', help='Do not save motion vector')
 parser.add_argument('-d', '--dropbox', default=False, action='store_true', dest='with_dropbox', help='Remove result folder and copy results in the dropbox folder (only cloud server)')
-# parser.add_argument('-pmc', '--pre_matrix', default=False, action='store_true', dest='prec_matrix', help='Use precomputed matrix, if they exists, else create news')
-parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector')
+parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector instead that frame per frame vector')
+parser.add_argument('-gl', '--global-local-vector', action='store_true', help='Use the sum of global motion vector and the frame per frame vector')
 parser.add_argument('-m', '--method', default='seam_merging_gc', choices=['seam_merging_gc', 'seam_merging', 'seam_carving', 'time_merging'], help='Algorithm to use, seam_merging_gc is the seam merging algorithm using graph cut instead of dynamic programming')
 args = parser.parse_args()
 
@@ -88,6 +88,18 @@ def get_cap(filename):
   if filename.endswith(('.m4v')):
     return cv2.VideoCapture(filename)
   return image_open(filename)
+
+
+def save_frames(mat, filename, string_append):
+  mat = np.clip(mat, 0, 255).astype(np.uint8)
+  mat = np.expand_dims(mat, axis=3)[:, :, :, [0, 0, 0]]
+  save_video_caps(mat, './results/' + filename + string_append)
+
+
+def normalize_max(mat):
+  maxv = mat.max(axis=0)
+  maxv[np.where(maxv == 0)] = 1
+  return mat[:] / maxv * 255
 
 
 def get_output_file_name(filename):
@@ -173,28 +185,30 @@ def batch_videos(filename):
     savemat(mat_name, {'importance': importance, 'cartoon': cartoon, 'video': video, 'vectors': vectors}, do_compression=True)
 
   # Motion vector normalizing and saving
-  maxv = vectors.max(axis=0)
-  maxv[np.where(maxv == 0)] = 1
-  vectors = vectors[:] / maxv * 255
+  vectors = normalize_max(vectors)
   # Use a global motion vector (consider every frame)
-  if args.global_vector:
+  if args.global_vector or args.global_local_vector:
     normalized = vectors.sum(axis=0)
     normalized = np.clip(normalized, 0, 255)
     if args.save_vectors:
       vecs = normalized[:, :, np.newaxis]
       cv2.imwrite('./results/' + name + '_vectors.bmp', vecs[:, :, [0, 0, 0]])
-    vectors[:] = normalized
+    print args.global_local_vector
+    if args.global_local_vector:
+      vectors[:] += normalized
+      vectors = normalize_max(vectors)
+      if args.save_vectors:
+        save_frames(vectors, name, '_vectors_')
+    else:
+      vectors[:] = normalized
   # Use a frame per frame motion vector
   else:
     if args.save_vectors:
-      v2 = np.clip(vectors, 0, 255).astype(np.uint8)
-      v2 = np.expand_dims(v2, axis=3)[:, :, :, [0, 0, 0]]
-      save_video_caps(v2, './results/' + name + '_vectors_')
+      save_frames(vectors, name, '_vectors_')
 
   if args.save_importance:
-    imp = np.clip(importance, 0, 255).astype(np.uint8)
-    imp = np.expand_dims(imp, axis=3)[:, :, :, [0, 0, 0]]
-    save_video_caps(imp, './results/' + name + '_importance_')
+    save_frames(importance, name, '_importance_')
+
 
   if args.method == "seam_merging_gc":
     result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
@@ -218,7 +232,8 @@ if args.with_dropbox:
   os.system("rm -rf results/*")
 
 
-# batch("./testing_videos/downsample/other/car_down_61.m4v")
+# batch("./testing_videos/downsample/other/4_videos/car_down_31.m4v")
+# batch("./testing_images/reduction/cup.png")
 
 print "----------START----------"
 time1 = time.time()
