@@ -20,6 +20,7 @@ from utils.optical_flow import farneback
 from utils.video_helper import save_video_caps
 from utils.parallelize import parallelize
 from utils.image_helper import image_open, image_save
+from utils.seams import print_time_seams
 from tvd import TotalVariationDenoising
 
 # Fix path name relationships when this script is running from a different folder
@@ -190,37 +191,37 @@ def batch_videos(filename):
   if args.global_vector or args.global_local_vector:
     normalized = vectors.sum(axis=0)
     normalized = np.clip(normalized, 0, 255)
-    if args.save_vectors:
-      vecs = normalized[:, :, np.newaxis]
-      cv2.imwrite('./results/' + name + '_vectors.bmp', vecs[:, :, [0, 0, 0]])
-    print args.global_local_vector
-    if args.global_local_vector:
+    if args.global_vector:
+      vectors[:] = normalized
+      if args.save_vectors:
+        vecs = normalized[:, :, np.newaxis]
+        cv2.imwrite('./results/' + name + '_vectors.bmp', vecs[:, :, [0, 0, 0]])
+    elif args.global_local_vector:
       vectors[:] += normalized
       vectors = normalize_max(vectors)
-      if args.save_vectors:
-        save_frames(vectors, name, '_vectors_')
-    else:
-      vectors[:] = normalized
   # Use a frame per frame motion vector
-  else:
-    if args.save_vectors:
+
+  if args.save_vectors and not args.global_vector:
       save_frames(vectors, name, '_vectors_')
 
   if args.save_importance:
     save_frames(importance, name, '_importance_')
-
 
   if args.method == "seam_merging_gc":
     result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
   elif args.method == "seam_carving":
     result, seams = sc.seam_carving(video, args.seam)
   elif args.method == "time_merging":
-    result, seams = vs.time_merging(video, cartoon, importance, None, args.seam, alpha, beta)
+    result, seams = vs.time_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
   else:
     sys.exit("Method " + args.method + " couldn't be applied to " + filename)
 
   # Saving seams frame images
-  A = print_seams(video, seams)
+  if args.method == "time_merging":
+    A = print_time_seams(video, seams)
+  else:
+    A = print_seams(video, seams)
+
   save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
   save_video_caps(np.clip(A * 0.8 + video, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
   cap.release()

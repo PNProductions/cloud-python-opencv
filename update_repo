@@ -11,5 +11,5 @@ echo "Updating py-seam-carving"
 cd ~/py-seam-carving
 update
 echo "Updating cloud-python-opencv"
-cd ~/py-video-retargeting
+cd ~/cloud-python-opencv
 git pull
