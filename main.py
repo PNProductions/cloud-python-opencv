@@ -20,7 +20,7 @@ from utils.optical_flow import farneback
 from utils.video_helper import save_video_caps
 from utils.parallelize import parallelize
 from utils.image_helper import image_open, image_save
-from utils.seams import print_time_seams
+from utils.seams import print_time_seams, print_seams
 from tvd import TotalVariationDenoising
 
 # Fix path name relationships when this script is running from a different folder
@@ -57,34 +57,13 @@ parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_fals
 parser.add_argument('-d', '--dropbox', default=False, action='store_true', dest='with_dropbox', help='Remove result folder and copy results in the dropbox folder (only cloud server)')
 parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector instead that frame per frame vector')
 parser.add_argument('-gl', '--global-local-vector', action='store_true', help='Use the sum of global motion vector and the frame per frame vector')
+parser.add_argument('-mf', '--method-fix', action='store_true', help='Use the slower but more accurate method for graph construction, only for seam_merging_gc')
 parser.add_argument('-m', '--method', default='seam_merging_gc', choices=['seam_merging_gc', 'seam_merging', 'seam_carving', 'time_merging'], help='Algorithm to use, seam_merging_gc is the seam merging algorithm using graph cut instead of dynamic programming')
 args = parser.parse_args()
 
 
 # -------------------------------------------------------
 # -------------------------------------------------------
-def generate_step(I, img):
-  result = np.empty((img.shape[0], img.shape[1], img.shape[2]))
-  r = np.arange(img.shape[2])
-  for i in xrange(img.shape[0]):
-    result[i] = r > np.vstack(I[i])
-  return result.astype(np.uint64)
-
-
-def print_seams(result, seams):
-  seams = seams.astype(np.uint64)
-  A = np.zeros_like(result)  # np.ones_like(result) * 255
-  correction = np.zeros((result.shape[0], result.shape[1], result.shape[2])).astype(np.uint64)
-  for i in xrange(seams.shape[0]):
-    X, Y = np.mgrid[:result.shape[0], :result.shape[1]]
-    I = seams[i]
-    I = I + correction[X, Y, I]
-    color = np.random.rand(3) * 255
-    A[X, Y, I] = color
-    correction = correction + generate_step(I, result)
-  return A
-
-
 def get_cap(filename):
   if filename.endswith(('.m4v')):
     return cv2.VideoCapture(filename)
@@ -97,16 +76,17 @@ def save_frames(mat, filename, string_append):
   save_video_caps(mat, './results/' + filename + string_append)
 
 
-def normalize_max(mat):
-  maxv = mat.max(axis=0)
-  maxv[np.where(maxv == 0)] = 1
-  return mat[:] / maxv * 255
-
-
 def get_output_file_name(filename):
   size = '_reduce' if args.seam < 0 else '_enlarge'
   size += str(-args.seam) if args.seam < 0 else str(args.seam)
-  return splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + args.method
+  if args.global_vector:
+    mv = '_global_'
+  elif args.global_local_vector:
+    mv = '_global_local_'
+  else:
+    mv = '_local_mv_'
+
+  return splitext(basename(filename))[0] + suffix + '_' + '_' + size + '_' + mv + args.method
 
 
 def cartoon_image(image):
@@ -136,18 +116,28 @@ def batch_images(filename):
   y, cartoon = cartoon_image(image)
   importance = importance_map(y)
   if args.method == "seam_merging_gc":
-    img = vs.seam_merging(image, cartoon, importance, None, args.seam if args.seam is not None else image.shape[0] / 2, alpha, beta)
+    if args.method_fix:
+      img, seams = vs.seam_merging(image, cartoon, importance, None, args.seam, alpha, beta, methods=vs.STR | vs.ITE | vs.IMP | vs.FIX)
+    else:
+      img, seams = vs.seam_merging(image, cartoon, importance, None, args.seam, alpha, beta)
   elif args.method == "seam_merging":
-    img = sm.seam_merging(image, cartoon, importance, args.seam, alpha, beta)
+    img, seams = sm.seam_merging(image, cartoon, importance, args.seam, alpha, beta)
   elif args.method == "seam_carving":
-    img = sc.seam_carving(image, args.seam)
+    img, seams = sc.seam_carving(image, args.seam)
   else:
     sys.exit("Method " + args.method + " couldn't be applied to " + filename)
   image_save(img, name, './results/')
+  seams = print_seams(image, img, seams, args.seam)
+  image_save(seams, name + '_seams_', './results/')
   print filename + ' finished!'
 
 
 def batch_videos(filename):
+  def normalize_max(mat):
+    maxv = mat.max(axis=0)
+    maxv[np.where(maxv == 0)] = 1
+    return mat[:] / maxv * 255
+
   cap = get_cap(filename)
   args.seam = args.seam if args.seam is not None else 1
   name = get_output_file_name(filename)
@@ -199,7 +189,6 @@ def batch_videos(filename):
     elif args.global_local_vector:
       vectors[:] += normalized
       vectors = normalize_max(vectors)
-  # Use a frame per frame motion vector
 
   if args.save_vectors and not args.global_vector:
       save_frames(vectors, name, '_vectors_')
@@ -220,10 +209,10 @@ def batch_videos(filename):
   if args.method == "time_merging":
     A = print_time_seams(video, seams)
   else:
-    A = print_seams(video, seams)
+    A = print_seams(video, result, seams, args.seam)
 
   save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
-  save_video_caps(np.clip(A * 0.8 + video, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
+  save_video_caps(np.clip(A, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
   cap.release()
   print 'Finished file: ' + basename(filename)
 
