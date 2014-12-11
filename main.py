@@ -51,7 +51,8 @@ saveBMP = True
 parser = argparse.ArgumentParser(description='Image and video retargeting with different methods')
 parser.add_argument('-p', '--path', default='testing_videos/downsample/japan/', type=str, help='Path for the videos to retarget')
 parser.add_argument('-s', '--seam', type=int, help='Seam to use (default 1 for videos, image_width/2 for images)')
-parser.add_argument('-f', '--frame', type=int, help='Frame to use (default all video frame)')
+parser.add_argument('-fs', '--frame-start', type=int, default=1, help='Starting frame')
+parser.add_argument('-fe', '--frame-end', type=int, help='Ending frame (default last video frame)')
 parser.add_argument('-i', '--save-importance', action='store_true', help='Save importance map')
 parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_false', dest='save_vectors', help='Do not save motion vector')
 parser.add_argument('-d', '--dropbox', default=False, action='store_true', dest='with_dropbox', help='Remove result folder and copy results in the dropbox folder (only cloud server)')
@@ -143,12 +144,12 @@ def batch_videos(filename):
   name = get_output_file_name(filename)
 
   frame_count, fps, width, height = cap.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT), cap.get(cv2.cv.CV_CAP_PROP_FPS), cap.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH), cap.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-  frame_count = frame_count if args.frame is None else args.frame
+  frame_count = frame_count if args.frame_end is None else args.frame_end
 
-  importance = np.empty((frame_count, height, width))
-  cartoon = np.empty((frame_count, height, width))
-  video = np.empty((frame_count, height, width, 3))
-  vectors = np.empty((frame_count, height, width))
+  importance = np.empty((frame_count - args.frame_start + 1, height, width))
+  cartoon = np.empty((frame_count - args.frame_start + 1, height, width))
+  video = np.empty((frame_count - args.frame_start + 1, height, width, 3))
+  vectors = np.empty((frame_count - args.frame_start + 1, height, width))
 
   mat_name = './temp/' + splitext(basename(filename))[0] + '_' + str(frame_count) + '_garbage.mat'
 
@@ -156,25 +157,29 @@ def batch_videos(filename):
     r = loadmat(mat_name)
     video, cartoon, importance, vectors = r['video'], r['cartoon'], r['importance'], r['vectors']
   else:
-    i = 0
-    while cap.isOpened() and i < frame_count:
+    i, j = 0, 0
+    while cap.isOpened() and j < frame_count:
+      j += 1
       ret, image = cap.read()
-      if not ret:
-        break
-      y, cartoon[i] = cartoon_image(image)
+      if j >= args.frame_start:
+        if not ret:
+          break
 
-      # Motion vector frame per frame (filtered with medianBlur to delete salt and pepper noise)
-      if i > 0:
-        vectors[i - 1] = farneback(cartoon[i - 1], cartoon[i])
-        vectors[i - 1] = cv2.medianBlur(vectors[i - 1].astype(np.uint8), 19).astype(np.float64)
+        y, cartoon[i] = cartoon_image(image)
 
-      importance[i] = importance_map(y)
+        # Motion vector frame per frame (filtered with medianBlur to delete salt and pepper noise)
+        if i > 0:
+          vectors[i - 1] = farneback(cartoon[i - 1], cartoon[i])
+          vectors[i - 1] = cv2.medianBlur(vectors[i - 1].astype(np.uint8), 19).astype(np.float64)
 
-      video[i] = image
-      i += 1
+        importance[i] = importance_map(y)
+
+        video[i] = image
+        i += 1
 
     savemat(mat_name, {'importance': importance, 'cartoon': cartoon, 'video': video, 'vectors': vectors}, do_compression=True)
 
+  print video.shape, importance.shape, cartoon.shape, vectors.shape
   # Motion vector normalizing and saving
   vectors = normalize_max(vectors)
   # Use a global motion vector (consider every frame)
