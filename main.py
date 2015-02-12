@@ -16,7 +16,7 @@ from scipy.io import savemat, loadmat
 import videoseam as vs
 import seamcarving as sc
 import seammerging as sm
-from utils.optical_flow import farneback
+from utils.optical_flow import farneback, improved_farneback
 from utils.video_helper import save_video_caps
 from utils.parallelize import parallelize
 from utils.image_helper import image_open, image_save
@@ -56,6 +56,7 @@ parser.add_argument('-fe', '--frame-end', type=int, help='Ending frame (default 
 parser.add_argument('-i', '--save-importance', action='store_true', help='Save importance map')
 parser.add_argument('-nv', '--no-save-vectors', default=True, action='store_false', dest='save_vectors', help='Do not save motion vector')
 parser.add_argument('-d', '--dropbox', default=False, action='store_true', dest='with_dropbox', help='Remove result folder and copy results in the dropbox folder (only cloud server)')
+parser.add_argument('-if', '--improved-farneback', default=False, action='store_true', help='Use improved farneback to check camera movement in the image')
 parser.add_argument('-g', '--global-vector', action='store_true', help='Use global motion vector instead that frame per frame vector')
 parser.add_argument('-gl', '--global-local-vector', action='store_true', help='Use the sum of global motion vector and the frame per frame vector')
 parser.add_argument('-mf', '--method-fix', action='store_true', help='Use the slower but more accurate method for graph construction, only for seam_merging_gc')
@@ -124,7 +125,7 @@ def batch_images(filename):
   elif args.method == "seam_merging":
     img, seams = sm.seam_merging(image, cartoon, importance, args.seam, alpha, beta)
   elif args.method == "seam_carving":
-    img, seams = sc.seam_carving(image, args.seam)
+    img, seams = sc.seam_carving(image, args.seam, False)
   else:
     sys.exit("Method " + args.method + " couldn't be applied to " + filename)
   image_save(img, name, './results/')
@@ -169,7 +170,10 @@ def batch_videos(filename):
 
         # Motion vector frame per frame (filtered with medianBlur to delete salt and pepper noise)
         if i > 0:
-          vectors[i - 1] = farneback(cartoon[i - 1], cartoon[i])
+          if args.improved_farneback:
+            vectors[i - 1] = improved_farneback(cartoon[i - 1], cartoon[i])
+          else:
+            vectors[i - 1] = farneback(cartoon[i - 1], cartoon[i])
           vectors[i - 1] = cv2.medianBlur(vectors[i - 1].astype(np.uint8), 19).astype(np.float64)
 
         importance[i] = importance_map(y)
@@ -179,7 +183,6 @@ def batch_videos(filename):
 
     savemat(mat_name, {'importance': importance, 'cartoon': cartoon, 'video': video, 'vectors': vectors}, do_compression=True)
 
-  print video.shape, importance.shape, cartoon.shape, vectors.shape
   # Motion vector normalizing and saving
   vectors = normalize_max(vectors)
   # Use a global motion vector (consider every frame)
@@ -201,23 +204,24 @@ def batch_videos(filename):
   if args.save_importance:
     save_frames(importance, name, '_importance_')
 
-  if args.method == "seam_merging_gc":
-    result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
-  elif args.method == "seam_carving":
-    result, seams = sc.seam_carving(video, args.seam)
-  elif args.method == "time_merging":
-    result, seams = vs.time_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
-  else:
-    sys.exit("Method " + args.method + " couldn't be applied to " + filename)
+  # if args.method == "seam_merging_gc":
+  #   # result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta, methods=vs.STR | vs.ITE | vs.IMP) # disattiva i motion vector
+  #   result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
+  # elif args.method == "seam_carving":
+  #   result, seams = sc.seam_carving(video, args.seam)
+  # elif args.method == "time_merging":
+  #   result, seams = vs.time_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
+  # else:
+  #   sys.exit("Method " + args.method + " couldn't be applied to " + filename)
 
-  # Saving seams frame images
-  if args.method == "time_merging":
-    A = print_time_seams(video, seams)
-  else:
-    A = print_seams(video, result, seams, args.seam)
+  # # Saving seams frame images
+  # if args.method == "time_merging":
+  #   A = print_time_seams(video, seams)
+  # else:
+  #   A = print_seams(video, result, seams, args.seam)
 
-  save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
-  save_video_caps(np.clip(A, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
+  # save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
+  # save_video_caps(np.clip(A, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
   cap.release()
   print 'Finished file: ' + basename(filename)
 
