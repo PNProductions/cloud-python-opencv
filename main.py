@@ -204,24 +204,24 @@ def batch_videos(filename):
   if args.save_importance:
     save_frames(importance, name, '_importance_')
 
-  # if args.method == "seam_merging_gc":
-  #   # result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta, methods=vs.STR | vs.ITE | vs.IMP) # disattiva i motion vector
-  #   result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
-  # elif args.method == "seam_carving":
-  #   result, seams = sc.seam_carving(video, args.seam)
-  # elif args.method == "time_merging":
-  #   result, seams = vs.time_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
-  # else:
-  #   sys.exit("Method " + args.method + " couldn't be applied to " + filename)
+  if args.method == "seam_merging_gc":
+    # result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta, methods=vs.STR | vs.ITE | vs.IMP) # disattiva i motion vector
+    result, seams = vs.seam_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
+  elif args.method == "seam_carving":
+    result, seams = sc.seam_carving(video, args.seam, False)
+  elif args.method == "time_merging":
+    result, seams = vs.time_merging(video, cartoon, importance, vectors, args.seam, alpha, beta)
+  else:
+    sys.exit("Method " + args.method + " couldn't be applied to " + filename)
 
-  # # Saving seams frame images
-  # if args.method == "time_merging":
-  #   A = print_time_seams(video, seams)
-  # else:
-  #   A = print_seams(video, result, seams, args.seam)
+  # Saving seams frame images
+  if args.method == "time_merging":
+    A = print_time_seams(video, seams)
+  else:
+    A = print_seams(video, result, seams, args.seam)
 
-  # save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
-  # save_video_caps(np.clip(A, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
+  save_video_caps(np.clip(result, 0, 255).astype(np.uint8), './results/' + name + '_')
+  save_video_caps(np.clip(A, 0, 255).astype(np.uint8), './results/' + name + '_seams_')
   cap.release()
   print 'Finished file: ' + basename(filename)
 
